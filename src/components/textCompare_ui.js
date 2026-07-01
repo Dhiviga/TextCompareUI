@@ -121,11 +121,11 @@ function highlightDifferences(base, compare) {
 
   const leftTokens = tokenize(base);
   const rightTokens = tokenize(compare);
-  const normalizedLeftTokens = leftTokens.map((token) => (isWhitespace(token) ? token : token.toLowerCase()));
-  const normalizedRightTokens = rightTokens.map((token) => (isWhitespace(token) ? token : token.toLowerCase()));
-
-  const dp = createLCSMatrix(normalizedLeftTokens, normalizedRightTokens);
-  const matchedMap = buildLCSMap(normalizedLeftTokens, normalizedRightTokens, dp);
+  
+  // Use exact character matching for LCS (case-sensitive, space-sensitive)
+  // This ensures all differences including 'D' and spaces are detected
+  const dp = createLCSMatrix(leftTokens, rightTokens);
+  const matchedMap = buildLCSMap(leftTokens, rightTokens, dp);
 
   const matchedPairs = Array.from(matchedMap.entries())
     .map(([leftIndex, rightIndex]) => ({ leftIndex, rightIndex }))
@@ -140,40 +140,30 @@ function highlightDifferences(base, compare) {
     const leftDiffTokens = leftTokens.slice(leftCursor, leftIndex);
     const rightDiffTokens = rightTokens.slice(rightCursor, rightIndex);
 
+    // Highlight all tokens between matches (these are differences)
     if (leftDiffTokens.length || rightDiffTokens.length) {
-      leftHtml.push(...leftDiffTokens.map((token) => renderToken(token, true, 'highlight-space-diff')));
-      rightHtml.push(...rightDiffTokens.map((token) => renderToken(token, true, 'highlight-space-diff')));
+      leftHtml.push(...leftDiffTokens.map((token) => 
+        renderToken(token, true, 'highlight-space-diff')
+      ));
+      rightHtml.push(...rightDiffTokens.map((token) => 
+        renderToken(token, true, 'highlight-space-diff')
+      ));
     }
 
+    // Render matched tokens (exact matches only)
     if (leftTokens[leftIndex] && rightTokens[rightIndex]) {
-      if (isWhitespace(leftTokens[leftIndex]) && isWhitespace(rightTokens[rightIndex])) {
+      if (leftTokens[leftIndex] === rightTokens[rightIndex]) {
+        // Exact match - no highlight
         leftHtml.push(renderToken(leftTokens[leftIndex], false, ''));
         rightHtml.push(renderToken(rightTokens[rightIndex], false, ''));
-      } else if (!isWhitespace(leftTokens[leftIndex]) && !isWhitespace(rightTokens[rightIndex])) {
-        if (leftTokens[leftIndex].toLowerCase() === rightTokens[rightIndex].toLowerCase() && leftTokens[leftIndex] !== rightTokens[rightIndex]) {
-          // Case difference
-          leftHtml.push(`<u class="highlight-case">${escapeHtml(leftTokens[leftIndex])}</u>`);
-          rightHtml.push(`<u class="highlight-case">${escapeHtml(rightTokens[rightIndex])}</u>`);
-        } else if (leftTokens[leftIndex] !== rightTokens[rightIndex]) {
-          leftHtml.push(renderToken(leftTokens[leftIndex], true, 'highlight-word-diff'));
-          rightHtml.push(renderToken(rightTokens[rightIndex], true, 'highlight-word-diff'));
-        } else {
-          leftHtml.push(renderToken(leftTokens[leftIndex], false, ''));
-          rightHtml.push(renderToken(rightTokens[rightIndex], false, ''));
-        }
-      } else {
-        leftHtml.push(renderToken(leftTokens[leftIndex], true, 'highlight-space-diff'));
-        rightHtml.push(renderToken(rightTokens[rightIndex], true, 'highlight-space-diff'));
       }
-    } else {
-      leftHtml.push(renderToken(leftTokens[leftIndex], false, ''));
-      rightHtml.push(renderToken(rightTokens[rightIndex], false, ''));
     }
 
     leftCursor = leftIndex + 1;
     rightCursor = rightIndex + 1;
   });
 
+  // Handle remaining tokens - all are differences and should be highlighted
   const leftRemainingTokens = leftTokens.slice(leftCursor);
   const rightRemainingTokens = rightTokens.slice(rightCursor);
   if (leftRemainingTokens.length || rightRemainingTokens.length) {
