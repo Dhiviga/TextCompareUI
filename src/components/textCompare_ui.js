@@ -8,7 +8,8 @@ const leftResult = document.getElementById('leftResult');
 const rightResult = document.getElementById('rightResult');
 
 function tokenize(text) {
-  return text.match(/(\s+|[^\s]+)/g) || [];
+  // Tokenize character by character to preserve all details including spaces
+  return text.split('');
 }
 
 function isWhitespace(token) {
@@ -144,17 +145,25 @@ function highlightDifferences(base, compare) {
       rightHtml.push(...rightDiffTokens.map((token) => renderToken(token, true, 'highlight-space-diff')));
     }
 
-    if (leftTokens[leftIndex] && rightTokens[rightIndex] && !isWhitespace(leftTokens[leftIndex]) && !isWhitespace(rightTokens[rightIndex])) {
-      if (leftTokens[leftIndex].toLowerCase() === rightTokens[rightIndex].toLowerCase() && leftTokens[leftIndex] !== rightTokens[rightIndex]) {
-        const caseDiff = highlightWordCaseDifference(leftTokens[leftIndex], rightTokens[rightIndex]);
-        leftHtml.push(caseDiff.left);
-        rightHtml.push(caseDiff.right);
-      } else if (leftTokens[leftIndex] !== rightTokens[rightIndex]) {
-        leftHtml.push(renderToken(leftTokens[leftIndex], true, 'highlight-word-diff'));
-        rightHtml.push(renderToken(rightTokens[rightIndex], true, 'highlight-word-diff'));
-      } else {
+    if (leftTokens[leftIndex] && rightTokens[rightIndex]) {
+      if (isWhitespace(leftTokens[leftIndex]) && isWhitespace(rightTokens[rightIndex])) {
         leftHtml.push(renderToken(leftTokens[leftIndex], false, ''));
         rightHtml.push(renderToken(rightTokens[rightIndex], false, ''));
+      } else if (!isWhitespace(leftTokens[leftIndex]) && !isWhitespace(rightTokens[rightIndex])) {
+        if (leftTokens[leftIndex].toLowerCase() === rightTokens[rightIndex].toLowerCase() && leftTokens[leftIndex] !== rightTokens[rightIndex]) {
+          // Case difference
+          leftHtml.push(`<u class="highlight-case">${escapeHtml(leftTokens[leftIndex])}</u>`);
+          rightHtml.push(`<u class="highlight-case">${escapeHtml(rightTokens[rightIndex])}</u>`);
+        } else if (leftTokens[leftIndex] !== rightTokens[rightIndex]) {
+          leftHtml.push(renderToken(leftTokens[leftIndex], true, 'highlight-word-diff'));
+          rightHtml.push(renderToken(rightTokens[rightIndex], true, 'highlight-word-diff'));
+        } else {
+          leftHtml.push(renderToken(leftTokens[leftIndex], false, ''));
+          rightHtml.push(renderToken(rightTokens[rightIndex], false, ''));
+        }
+      } else {
+        leftHtml.push(renderToken(leftTokens[leftIndex], true, 'highlight-space-diff'));
+        rightHtml.push(renderToken(rightTokens[rightIndex], true, 'highlight-space-diff'));
       }
     } else {
       leftHtml.push(renderToken(leftTokens[leftIndex], false, ''));
