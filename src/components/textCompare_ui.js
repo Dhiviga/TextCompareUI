@@ -167,9 +167,10 @@ function highlightDifferences(base, compare) {
     return highlightLetterDiff(leftWord, rightWord, isLeft);
   }
 
-  function renderSegment(tokens, start, end, altTokens) {
+  function renderSegment(tokens, start, end, altTokens, highlightWhitespaceIfExtra = false) {
     return tokens.slice(start, end).map((token, index) => {
       if (isWhitespace(token)) {
+        if (highlightWhitespaceIfExtra) return highlightToken(token, 'space');
         return token.length > 1 ? highlightToken(token, 'space') : token;
       }
       if (altTokens && altTokens[index] !== undefined) {
@@ -193,8 +194,8 @@ function highlightDifferences(base, compare) {
         outputLeft.push(renderSegment(leftTokens, leftCursor, leftTokenIdx, rightSegment));
         outputRight.push(renderSegment(rightTokens, rightCursor, rightTokenIdx, leftSegment));
       } else {
-        outputLeft.push(renderSegment(leftTokens, leftCursor, leftTokenIdx));
-        outputRight.push(renderSegment(rightTokens, rightCursor, rightTokenIdx));
+        outputLeft.push(renderSegment(leftTokens, leftCursor, leftTokenIdx, null, true));
+        outputRight.push(renderSegment(rightTokens, rightCursor, rightTokenIdx, null, true));
       }
 
       outputLeft.push(escapeHtml(leftTokens[leftTokenIdx]));
@@ -203,8 +204,8 @@ function highlightDifferences(base, compare) {
       rightCursor = rightTokenIdx + 1;
     });
 
-    outputLeft.push(renderSegment(leftTokens, leftCursor, leftTokens.length));
-    outputRight.push(renderSegment(rightTokens, rightCursor, rightTokens.length));
+    outputLeft.push(renderSegment(leftTokens, leftCursor, leftTokens.length, null, true));
+    outputRight.push(renderSegment(rightTokens, rightCursor, rightTokens.length, null, true));
 
     return {
       left: outputLeft.join('') || '<em>No text entered.</em>',
