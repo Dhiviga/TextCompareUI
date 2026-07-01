@@ -151,11 +151,14 @@ body {
 }
 
 .highlight-space {
+  display: inline-block;
+  min-width: 0.6em;
   background: #f87171;
   color: white;
   padding: 1px 4px;
   border-radius: 4px;
   font-weight: 600;
+  white-space: pre;
 }
 
 @media (max-width: 940px) {
