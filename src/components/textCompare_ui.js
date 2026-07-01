@@ -89,15 +89,15 @@ function highlightWordCaseDifference(leftWord, rightWord) {
     const rightChar = rightChars[index];
 
     if (leftChar === undefined) {
-      rightOutput += `<span class="highlight highlight-case">${escapeHtml(rightChar)}</span>`;
+      rightOutput += `<u class="highlight-case">${escapeHtml(rightChar)}</u>`;
     } else if (rightChar === undefined) {
-      leftOutput += `<span class="highlight highlight-case">${escapeHtml(leftChar)}</span>`;
+      leftOutput += `<u class="highlight-case">${escapeHtml(leftChar)}</u>`;
     } else if (leftChar === rightChar) {
       leftOutput += escapeHtml(leftChar);
       rightOutput += escapeHtml(rightChar);
     } else if (leftChar.toLowerCase() === rightChar.toLowerCase()) {
-      leftOutput += `<span class="highlight highlight-case">${escapeHtml(leftChar)}</span>`;
-      rightOutput += `<span class="highlight highlight-case">${escapeHtml(rightChar)}</span>`;
+      leftOutput += `<u class="highlight-case">${escapeHtml(leftChar)}</u>`;
+      rightOutput += `<u class="highlight-case">${escapeHtml(rightChar)}</u>`;
     } else {
       leftOutput += escapeHtml(leftChar);
       rightOutput += escapeHtml(rightChar);
