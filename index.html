@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Compare</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <div class="panel">
+        <div class="header-row">
+          <div>
+            <h1 class="header-title">Text Compare</h1>
+            <p class="header-subtitle">Edit, switch, compare texts, and see the differences.</p>
+          </div>
+          <div class="toolbar">
+            <button class="btn-secondary" id="editTextsBtn">Edit texts ...</button>
+            <button class="btn-secondary" id="switchTextsBtn">Switch texts</button>
+          </div>
+        </div>
+
+        <div class="text-area-row">
+          <div class="text-area-column">
+            <label for="leftText">Text 1</label>
+            <textarea id="leftText">I am dhiviga with 8 years of experience as a java backend developer. I am also having an experience in version control system like Git and Jenkins.</textarea>
+          </div>
+          <div class="text-area-column">
+            <label for="rightText">Text 2</label>
+            <textarea id="rightText">I am Dhiviga with 5 years of experience as a java professional. I am also having an experience in version control system like GitHub and Jenkins.</textarea>
+          </div>
+        </div>
+
+        <div class="buttons-row">
+          <button class="btn-primary" id="compareBtn">Compare!</button>
+          <button class="btn-secondary" id="clearBtn">Clear all</button>
+        </div>
+
+        <div class="compare-area">
+          <div class="compare-box">
+            <h3>Comparison Left</h3>
+            <div id="leftResult" class="compare-text"></div>
+          </div>
+          <div class="compare-box">
+            <h3>Comparison Right</h3>
+            <div id="rightResult" class="compare-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="src/components/textCompare_ui.js"></script>
+  </body>
+</html>
