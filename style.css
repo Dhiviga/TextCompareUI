@@ -143,11 +143,27 @@ body {
 }
 
 .highlight {
-  background: #fde68a;
-  color: #0f172a;
-  padding: 1px 4px;
+  background: #ef4444;
+  color: #ffffff;
   border-radius: 4px;
   font-weight: 600;
+}
+
+.highlight-case {
+  background: #38bdf8;
+  color: #082f49;
+}
+
+.highlight-word-diff {
+  background: #fb923c;
+  color: #111827;
+}
+
+.highlight-space-diff {
+  background: #ef4444;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 0 2px;
 }
 
 .highlight-space {
