@@ -22,14 +22,14 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;');
 }
 
-function createLCSMatrix(leftWords, rightWords) {
-  const rows = leftWords.length + 1;
-  const cols = rightWords.length + 1;
+function createLCSMatrix(leftItems, rightItems) {
+  const rows = leftItems.length + 1;
+  const cols = rightItems.length + 1;
   const dp = Array.from({ length: rows }, () => Array(cols).fill(0));
 
   for (let i = 1; i < rows; i += 1) {
     for (let j = 1; j < cols; j += 1) {
-      if (leftWords[i - 1] === rightWords[j - 1]) {
+      if (leftItems[i - 1] === rightItems[j - 1]) {
         dp[i][j] = dp[i - 1][j - 1] + 1;
       } else {
         dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
@@ -40,13 +40,13 @@ function createLCSMatrix(leftWords, rightWords) {
   return dp;
 }
 
-function buildLCSMap(leftWords, rightWords, dp) {
+function buildLCSMap(leftItems, rightItems, dp) {
   const map = new Map();
-  let i = leftWords.length;
-  let j = rightWords.length;
+  let i = leftItems.length;
+  let j = rightItems.length;
 
   while (i > 0 && j > 0) {
-    if (leftWords[i - 1] === rightWords[j - 1]) {
+    if (leftItems[i - 1] === rightItems[j - 1]) {
       map.set(i - 1, j - 1);
       i -= 1;
       j -= 1;
@@ -60,57 +60,121 @@ function buildLCSMap(leftWords, rightWords, dp) {
   return map;
 }
 
-function highlightDifferences(base, compare) {
-  const leftTokens = tokenize(base);
-  const rightTokens = tokenize(compare);
+function renderToken(token, isHighlighted, colorClass) {
+  const escaped = escapeHtml(token).replace(/ /g, '\u00A0');
+  if (!isHighlighted) {
+    return escaped;
+  }
 
-  const dp = createLCSMatrix(leftTokens, rightTokens);
-  const matchedMap = buildLCSMap(leftTokens, rightTokens, dp);
+  if (isWhitespace(token)) {
+    const classes = ['highlight-space'];
+    if (colorClass) classes.push(colorClass);
+    return `<span class="${classes.join(' ')}">${escaped}</span>`;
+  }
 
-  const matchedTokenPairs = Array.from(matchedMap.entries()).map(([leftTokenIdx, rightTokenIdx]) => ({
-    leftTokenIdx,
-    rightTokenIdx
-  }));
+  const classes = colorClass ? [colorClass] : ['highlight'];
+  return `<span class="${classes.join(' ')}">${escaped}</span>`;
+}
 
-  matchedTokenPairs.sort((a, b) => a.leftTokenIdx - b.leftTokenIdx);
+function highlightWordCaseDifference(leftWord, rightWord) {
+  const leftChars = Array.from(leftWord);
+  const rightChars = Array.from(rightWord);
+  const maxLength = Math.max(leftChars.length, rightChars.length);
 
-  function highlightToken(token, style) {
-    const escaped = escapeHtml(token);
-    const content = style === 'space' ? escaped.replace(/ /g, '\u00A0') : escaped;
+  let leftOutput = '';
+  let rightOutput = '';
 
-    if (style === 'space') {
-      return `<span class="highlight-space">${content}</span>`;
+  for (let index = 0; index < maxLength; index += 1) {
+    const leftChar = leftChars[index];
+    const rightChar = rightChars[index];
+
+    if (leftChar === undefined) {
+      rightOutput += `<span class="highlight highlight-case">${escapeHtml(rightChar)}</span>`;
+    } else if (rightChar === undefined) {
+      leftOutput += `<span class="highlight highlight-case">${escapeHtml(leftChar)}</span>`;
+    } else if (leftChar === rightChar) {
+      leftOutput += escapeHtml(leftChar);
+      rightOutput += escapeHtml(rightChar);
+    } else if (leftChar.toLowerCase() === rightChar.toLowerCase()) {
+      leftOutput += `<span class="highlight highlight-case">${escapeHtml(leftChar)}</span>`;
+      rightOutput += `<span class="highlight highlight-case">${escapeHtml(rightChar)}</span>`;
+    } else {
+      leftOutput += escapeHtml(leftChar);
+      rightOutput += escapeHtml(rightChar);
     }
-    return `<span class="highlight">${content}</span>`;
-  }
-
-  function renderSegment(tokens, start, end) {
-    return tokens.slice(start, end).map((token) => {
-      if (isWhitespace(token)) {
-        return highlightToken(token, 'space');
-      }
-      return highlightToken(token, 'word');
-    }).join('');
-  }
-
-  function renderSequence(tokens, matchPairs, isLeft) {
-    let cursor = 0;
-    const output = [];
-
-    matchPairs.forEach(({ leftTokenIdx, rightTokenIdx }) => {
-      const tokenIdx = isLeft ? leftTokenIdx : rightTokenIdx;
-      output.push(renderSegment(tokens, cursor, tokenIdx));
-      output.push(escapeHtml(tokens[tokenIdx]));
-      cursor = tokenIdx + 1;
-    });
-
-    output.push(renderSegment(tokens, cursor, tokens.length));
-    return output.join('');
   }
 
   return {
-    left: renderSequence(leftTokens, matchedTokenPairs, true) || '<em>No text entered.</em>',
-    right: renderSequence(rightTokens, matchedTokenPairs, false) || '<em>No text entered.</em>'
+    left: leftOutput,
+    right: rightOutput
+  };
+}
+
+function highlightDifferences(base, compare) {
+  if (!base && !compare) {
+    return {
+      left: '<em>No text entered.</em>',
+      right: '<em>No text entered.</em>'
+    };
+  }
+
+  const leftTokens = tokenize(base);
+  const rightTokens = tokenize(compare);
+  const normalizedLeftTokens = leftTokens.map((token) => (isWhitespace(token) ? token : token.toLowerCase()));
+  const normalizedRightTokens = rightTokens.map((token) => (isWhitespace(token) ? token : token.toLowerCase()));
+
+  const dp = createLCSMatrix(normalizedLeftTokens, normalizedRightTokens);
+  const matchedMap = buildLCSMap(normalizedLeftTokens, normalizedRightTokens, dp);
+
+  const matchedPairs = Array.from(matchedMap.entries())
+    .map(([leftIndex, rightIndex]) => ({ leftIndex, rightIndex }))
+    .sort((a, b) => a.leftIndex - b.leftIndex);
+
+  const leftHtml = [];
+  const rightHtml = [];
+  let leftCursor = 0;
+  let rightCursor = 0;
+
+  matchedPairs.forEach(({ leftIndex, rightIndex }) => {
+    const leftDiffTokens = leftTokens.slice(leftCursor, leftIndex);
+    const rightDiffTokens = rightTokens.slice(rightCursor, rightIndex);
+
+    if (leftDiffTokens.length || rightDiffTokens.length) {
+      leftHtml.push(...leftDiffTokens.map((token) => renderToken(token, true, 'highlight-space-diff')));
+      rightHtml.push(...rightDiffTokens.map((token) => renderToken(token, true, 'highlight-space-diff')));
+    }
+
+    if (leftTokens[leftIndex] && rightTokens[rightIndex] && !isWhitespace(leftTokens[leftIndex]) && !isWhitespace(rightTokens[rightIndex])) {
+      if (leftTokens[leftIndex].toLowerCase() === rightTokens[rightIndex].toLowerCase() && leftTokens[leftIndex] !== rightTokens[rightIndex]) {
+        const caseDiff = highlightWordCaseDifference(leftTokens[leftIndex], rightTokens[rightIndex]);
+        leftHtml.push(caseDiff.left);
+        rightHtml.push(caseDiff.right);
+      } else if (leftTokens[leftIndex] !== rightTokens[rightIndex]) {
+        leftHtml.push(renderToken(leftTokens[leftIndex], true, 'highlight-word-diff'));
+        rightHtml.push(renderToken(rightTokens[rightIndex], true, 'highlight-word-diff'));
+      } else {
+        leftHtml.push(renderToken(leftTokens[leftIndex], false, ''));
+        rightHtml.push(renderToken(rightTokens[rightIndex], false, ''));
+      }
+    } else {
+      leftHtml.push(renderToken(leftTokens[leftIndex], false, ''));
+      rightHtml.push(renderToken(rightTokens[rightIndex], false, ''));
+    }
+
+    leftCursor = leftIndex + 1;
+    rightCursor = rightIndex + 1;
+  });
+
+  const leftRemainingTokens = leftTokens.slice(leftCursor);
+  const rightRemainingTokens = rightTokens.slice(rightCursor);
+  if (leftRemainingTokens.length || rightRemainingTokens.length) {
+    leftHtml.push(...leftRemainingTokens.map((token) => renderToken(token, true, 'highlight-space-diff')));
+    rightHtml.push(...rightRemainingTokens.map((token) => renderToken(token, true, 'highlight-space-diff')));
+  }
+
+  return {
+    left: leftHtml.join('') || '<em>No text entered.</em>',
+    right: rightHtml.join('') || '<em>No text entered.</em>'
   };
 }
 
@@ -124,6 +188,8 @@ function renderComparison() {
 }
 
 compareBtn.addEventListener('click', renderComparison);
+leftText.addEventListener('input', renderComparison);
+rightText.addEventListener('input', renderComparison);
 clearBtn.addEventListener('click', () => {
   leftText.value = '';
   rightText.value = '';
