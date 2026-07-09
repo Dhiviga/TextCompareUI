@@ -3,6 +3,7 @@ const rightText = document.getElementById('rightText');
 const compareBtn = document.getElementById('compareBtn');
 const clearBtn = document.getElementById('clearBtn');
 const editBtn = document.getElementById('editTextsBtn');
+const switchBtn = document.getElementById('SwitchBtn');
 const leftResult = document.getElementById('leftResult');
 const rightResult = document.getElementById('rightResult');
 const message = document.getElementById('message');
@@ -207,6 +208,12 @@ clearBtn.addEventListener('click', () => {
   leftResult.innerHTML = '<em>No text entered.</em>';
   rightResult.innerHTML = '<em>No text entered.</em>';
   message.textContent = '';
+});
+
+switchBtn.addEventListener('click', () => {
+  const temp = leftText.value;
+  leftText.value = rightText.value;
+  rightText.value = temp;
 });
 
 editBtn.addEventListener('click', () => {
