@@ -2,10 +2,10 @@ const leftText = document.getElementById('leftText');
 const rightText = document.getElementById('rightText');
 const compareBtn = document.getElementById('compareBtn');
 const clearBtn = document.getElementById('clearBtn');
-const switchBtn = document.getElementById('switchTextsBtn');
 const editBtn = document.getElementById('editTextsBtn');
 const leftResult = document.getElementById('leftResult');
 const rightResult = document.getElementById('rightResult');
+const message = document.getElementById('message');
 
 function tokenize(text) {
   // Tokenize character by character to preserve all details including spaces
@@ -184,27 +184,47 @@ function renderComparison() {
 
   leftResult.innerHTML = result.left;
   rightResult.innerHTML = result.right;
+
+
+  if (leftValue === '' && rightValue === '') {
+      message.textContent = '';
+    }
+  else if (leftValue === rightValue) {
+      message.textContent = '✅ Both texts are same';
+      message.style.color = 'green';
+  } else {
+      message.textContent = '❌ Both texts are different';
+      message.style.color = 'red';
+  }
 }
 
 compareBtn.addEventListener('click', renderComparison);
-leftText.addEventListener('input', renderComparison);
-rightText.addEventListener('input', renderComparison);
+//leftText.addEventListener('input', renderComparison);
+//rightText.addEventListener('input', renderComparison);
 clearBtn.addEventListener('click', () => {
   leftText.value = '';
   rightText.value = '';
   leftResult.innerHTML = '<em>No text entered.</em>';
   rightResult.innerHTML = '<em>No text entered.</em>';
-});
-
-switchBtn.addEventListener('click', () => {
-  const temp = leftText.value;
-  leftText.value = rightText.value;
-  rightText.value = temp;
-  renderComparison();
+  message.textContent = '';
 });
 
 editBtn.addEventListener('click', () => {
-  leftText.focus();
+  leftText.value = leftText.value.trim().replace(/\s+/g, ' ');
+  rightText.value = rightText.value.trim().replace(/\s+/g, ' ');
+
+  renderComparison();
+
+  if (leftValue === '' && rightValue === '') {
+      message.textContent = '';
+    }
+  else if (leftValue === rightValue) {
+      message.textContent = '✅ Both texts are same';
+      message.style.color = 'green';
+  } else {
+      message.textContent = '❌ Both texts are different';
+      message.style.color = 'red';
+  }
 });
 
 renderComparison();
