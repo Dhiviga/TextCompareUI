@@ -127,6 +127,8 @@ body {
 }
 
 .compare-box {
+  display: flex;
+  flex-direction: column;
   background: #f8fafc;
   border: 1px solid #cbd5e1;
   border-radius: 14px;
