@@ -134,7 +134,7 @@ body {
   border-radius: 14px;
   padding: 18px;
   min-height: 260px;
-  overflow-x: auto;
+  overflow-x: hidden;
   overflow-y: hidden;
 }
 
