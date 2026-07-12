@@ -75,6 +75,15 @@ body {
   color: #334155;
 }
 
+.btn-message{
+  background: #4dedf8;
+  color: white;
+  text-align: center;
+  top: 0;        /* much smaller than 40px */
+  font-weight: bold;
+  font-size: 16px;
+}
+
 .btn-secondary:hover,
 .btn-primary:hover {
   opacity: 0.95;
@@ -154,13 +163,6 @@ body {
   color: #0f172a;
   line-height: 1.6;
   margin: 0;
-}
-
-.message {
-  text-align: center;
-  top: 0;        /* much smaller than 40px */
-  font-weight: bold;
-  font-size: 16px;
 }
 
 .highlight {
