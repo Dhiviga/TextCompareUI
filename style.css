@@ -134,8 +134,11 @@ body {
   border-radius: 14px;
   padding: 18px;
   min-height: 260px;
+/* prevent horizontal scrolling caused by long lines */
   overflow-x: hidden;
-  overflow-y: hidden;
+  /* allow vertical scrolling only when necessary (optional) */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .compare-box h3 {
@@ -146,8 +149,11 @@ body {
 
 .compare-text {
   white-space: pre-wrap;
+  overflow-wrap: anywhere; 
+  word-break: break-word;
   color: #0f172a;
   line-height: 1.6;
+  margin: 0;
 }
 
 .message {
