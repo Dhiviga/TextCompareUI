@@ -76,8 +76,8 @@ body {
 }
 
 .btn-message{
-  background: white;
-  color: white;
+  background: #ffffff;
+  color: #ffffff;
   text-align: center;
   top: 0;        /* much smaller than 40px */
   font-weight: bold;
